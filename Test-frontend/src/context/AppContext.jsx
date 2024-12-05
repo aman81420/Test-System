@@ -34,6 +34,21 @@ const AppContextProvider = (props) => {
       .map((status, index) => (index === 0 ? "notAnswered" : status))
   );
 
+  const [isConfirm, setIsConfirm] = useState(false);
+  const handlePaperSelect = (paper) => {
+    setSelectedPaper(paper);
+    setIsConfirm(true);
+  };
+  const startTest = () => {
+    alert(`Test Started: ${selectedPaper.name}`);
+    // Navigate to the test or initialize the test
+    setIsConfirm(false);
+    setSelectedPaper(null);
+  };
+  const cancelConfirmation = () => {
+    setIsConfirm(false);
+    setSelectedPaper(null);
+  };
   const questionClickHandler = (num) => {
     setQuesNo(num);
     updateQuestionState(num);
@@ -194,6 +209,8 @@ const AppContextProvider = (props) => {
     quesStatement,
     setQuesStatement,
     timer,
+    isConfirm,
+    setIsConfirm,
   };
 
   return (

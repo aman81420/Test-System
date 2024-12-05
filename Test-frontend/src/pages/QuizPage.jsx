@@ -1,8 +1,10 @@
 import React, { useContext, useState, useEffect } from "react";
 import assets from "../assets/assets";
 import { AppContext } from "../context/AppContext";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const QuizPage = () => {
+  const Navigate = useNavigate();
   const {
     quesNo,
 
@@ -25,6 +27,8 @@ const QuizPage = () => {
     quesStatement,
     setQuesStatement,
     timer,
+    isConfirm,
+    setIsConfirm,
   } = useContext(AppContext);
 
   const formatTime = (seconds) => {
@@ -47,8 +51,52 @@ const QuizPage = () => {
       setSelectedOption(userAns[quesNo - 1] || null); // Adjusted index
     }
   }, [quesNo, quizQuestions, userAns, questionStatus]);
+  useEffect(() => {}, [isConfirm]);
 
-  return (
+  // to disable the reload and back option
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    const preventBackNavigation = () => {
+      window.history.pushState(null, "", window.location.href);
+    };
+
+    window.history.pushState(null, "", window.location.href);
+    window.addEventListener("popstate", preventBackNavigation);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("popstate", preventBackNavigation);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
+  return !isConfirm ? (
+    <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+      <div className="bg-white p-6 rounded shadow-lg">
+        <h2 className="text-lg font-bold mb-4">
+          Are you sure you want to start the test?
+        </h2>
+        <div className="space-x-4">
+          <button
+            onClick={() => setIsConfirm(true)}
+            className="bg-green-500 text-white py-2 px-4 rounded"
+          >
+            Yes, Start
+          </button>
+          <button
+            onClick={() => Navigate("/")}
+            className="bg-red-500 text-white py-2 px-4 rounded"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  ) : (
     <div
       id="DSA-view"
       className="m-0 p-0 overflow-x-auto  max-width:100% min-width:1000px"
