@@ -11,7 +11,8 @@ const AppContextProvider = (props) => {
   const [token, setToken] = useState(
     localStorage.getItem("token") ? localStorage.getItem("token") : ""
   );
-  const [userData, setUserData] = useState(false);
+  const [userData, setUserData] = useState({});
+  const [teacherData, setTeacherData] = useState({});
 
   const [timer, setTimer] = useState(1500); // 25 minutes
   const Questions = assets.questions;
@@ -39,16 +40,7 @@ const AppContextProvider = (props) => {
     setSelectedPaper(paper);
     setIsConfirm(true);
   };
-  const startTest = () => {
-    alert(`Test Started: ${selectedPaper.name}`);
-    // Navigate to the test or initialize the test
-    setIsConfirm(false);
-    setSelectedPaper(null);
-  };
-  const cancelConfirmation = () => {
-    setIsConfirm(false);
-    setSelectedPaper(null);
-  };
+
   const questionClickHandler = (num) => {
     setQuesNo(num);
     updateQuestionState(num);
@@ -146,9 +138,12 @@ const AppContextProvider = (props) => {
   // Getting User Profile using API
   const loadUserProfileData = async () => {
     try {
-      const { data } = await axios.get(backendUrl + "/api/user/get-profile", {
-        headers: { token },
-      });
+      const { data } = await axios.get(
+        backendUrl + "/api/user/getUserProfile",
+        {
+          headers: { token },
+        }
+      );
 
       if (data.success) {
         setUserData(data.userData);
@@ -161,9 +156,31 @@ const AppContextProvider = (props) => {
     }
   };
 
+  // Getting teacher profile data
+  const loadTeacherProfileData = async () => {
+    try {
+      const { data } = await axios.get(
+        `${backendUrl}/api/user/getTeacherProfile`,
+        {
+          headers: { token },
+        }
+      );
+
+      if (data.success) {
+        setTeacherData(data.teacherData);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    }
+  };
+
   useEffect(() => {
     if (token) {
-      loadUserProfileData();
+      // loadUserProfileData();
+      loadTeacherProfileData();
     }
   }, [token]);
 
@@ -185,8 +202,9 @@ const AppContextProvider = (props) => {
     token,
     setToken,
     userData,
+    teacherData,
     setUserData,
-    loadUserProfileData,
+
     timer,
     quesNo,
 

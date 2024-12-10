@@ -2,11 +2,11 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import validator from "validator";
 import userModel from "../models/userModel.js";
-
+import teacherModel from "../models/teacherModel.js";
 // API to register user
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, userType } = req.body;
 
     // checking for all data to register user
     if (!name || !email || !password) {
@@ -37,9 +37,11 @@ const registerUser = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      userType,
     };
 
     const newUser = new userModel(userData);
+
     const user = await newUser.save();
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
@@ -50,10 +52,13 @@ const registerUser = async (req, res) => {
   }
 };
 
-// API to login user
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, userType } = req.body;
+    if (!email || !password || !userType) {
+      return res.json({ success: false, message: "All fields are required" });
+    }
+
     const user = await userModel.findOne({ email });
 
     if (!user) {
@@ -63,21 +68,24 @@ const loginUser = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (isMatch) {
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: "1d",
+      });
       res.json({ success: true, token });
     } else {
       res.json({ success: false, message: "Invalid credentials" });
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.json({ success: false, message: error.message });
   }
 };
 
 // API to get user profile data
-const getProfile = async (req, res) => {
+const getUserProfile = async (req, res) => {
   try {
     const { userId } = req.body;
+
     const userData = await userModel.findById(userId).select("-password");
 
     res.json({ success: true, userData });
@@ -87,4 +95,4 @@ const getProfile = async (req, res) => {
   }
 };
 
-export { loginUser, registerUser, getProfile };
+export { loginUser, registerUser, getUserProfile };

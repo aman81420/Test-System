@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema({
   gender: { type: String, default: "Not Selected" },
   dob: { type: String, default: "Not Selected" },
   password: { type: String, required: true },
+  userType: { type: String, default: "student" },
 });
 
 const userModel = mongoose.models.user || mongoose.model("user", userSchema);
