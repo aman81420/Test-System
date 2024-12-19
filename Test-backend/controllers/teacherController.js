@@ -181,7 +181,6 @@ const saveQuizPaper = async (req, res) => {
 };
 
 // API to get the paper submitted by teacher
-// API to get the paper submitted by teacher
 const getPaper = async (req, res) => {
   try {
     const { teacherId } = req.body; // Get teacherId from request body
@@ -208,10 +207,58 @@ const getPaper = async (req, res) => {
   }
 };
 
+
+
+    // API to update paper
+const updatePaper = async (req, res) => {
+  try {
+    const {
+      paperId,
+      totalQuestions,
+      time,
+      correctMarks,
+      negativeMarks,
+      subject,
+      questions, // Array of updated questions
+    } = req.body;
+
+    if (!paperId || !totalQuestions || !time || !correctMarks || !negativeMarks || !subject || !questions) {
+      return res.json({ success: false, message: "Missing required details" });
+    }
+
+    // Update the paper in the database with the new question set and other details
+    const updatedPaper = await paperModel.findByIdAndUpdate(
+      paperId,
+      {
+        totalQuestions,
+        time,
+        correctMarks,
+        negativeMarks,
+        subject,
+        questions, // Updated questions array
+      },
+      { new: true } // To return the updated document
+    );
+
+    if (!updatedPaper) {
+      return res.json({ success: false, message: "Paper not found" });
+    }
+
+    res.json({
+      success: true,
+      message: "Paper updated successfully",
+      paper: updatedPaper,
+    });
+  } catch (error) {
+    console.error("Error updating paper:", error);
+    res.json({ success: false, message: error.message });
+  }
+}
 export {
   loginTeacher,
   registerTeacher,
   saveQuizPaper,
   getPaper,
   getTeacherProfile,
+  updatePaper,
 };

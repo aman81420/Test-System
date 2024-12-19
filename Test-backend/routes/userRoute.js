@@ -10,6 +10,7 @@ import {
   getTeacherProfile,
   registerTeacher,
   loginTeacher,
+  updatePaper,
 } from "../controllers/teacherController.js";
 
 import authUser from "../middleware/authUser.js";
@@ -22,6 +23,8 @@ userRouter.post("/login", loginUser);
 userRouter.post("/loginTeacher", loginTeacher);
 userRouter.post("/saveQuizPaper", saveQuizPaper);
 userRouter.post("/getPaper", getPaper);
+// Update paper route
+userRouter.post("/updatePaper", updatePaper);
 
 userRouter.get("/getUserProfile", authUser, getUserProfile);
 userRouter.post(

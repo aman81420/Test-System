@@ -7,6 +7,7 @@ import { ToastContainer } from "react-toastify";
 import Login from "./pages/Login";
 import THome from "./pages/tHome";
 import TAskQues from "./components/TAddQues";
+import PaperDetails from "./components/PaperDetails";
 
 const App = () => {
   return (
@@ -18,6 +19,7 @@ const App = () => {
         <Route path="/Login" element={<Login />} />
         <Route path="/THome" element={<THome />} />
         <Route path="/TAddQues" element={<TAskQues />} />
+        <Route path="/paper/:id" element={<PaperDetails />} />
       </Routes>
     </div>
   );

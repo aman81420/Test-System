@@ -1,14 +1,15 @@
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { use } from "react";
 import { AppContext } from "../context/AppContext";
+import { useNavigate } from "react-router-dom";
 
 const TPreviousTest = ({ teacherId, token }) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [papers, setPapers] = useState([]);
   const [loading, setLoading] = useState(true);
   const { teacherData } = useContext(AppContext);
+  const navigate = useNavigate(); // Initialize inside the component
 
   // API call to get papers by teacherId
   const loadTeacherPapers = async () => {
@@ -22,9 +23,6 @@ const TPreviousTest = ({ teacherId, token }) => {
       } else {
         toast.error(data.message);
       }
-    } catch (error) {
-      console.error(error);
-      toast.error("Error fetching papers");
     } finally {
       setLoading(false);
     }
@@ -39,29 +37,45 @@ const TPreviousTest = ({ teacherId, token }) => {
 
   // Render the papers
   return (
-    <div className="papers-container">
+    <div className="p-6 bg-gray-100 min-h-screen">
       {loading ? (
-        <p>Loading papers...</p>
+        <p className="text-center text-lg text-gray-700">Loading papers...</p>
       ) : papers.length > 0 ? (
         <div>
-          <h2>All Papers Saved by Teacher</h2>
-          <ul>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            All Papers Saved by Teacher
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {papers.map((paper) => (
-              <li key={paper._id} className="paper-item">
-                <div className="paper-details">
-                  <h3>{paper.subject}</h3>
-                  <p>Total Questions: {paper.totalQuestions}</p>
-                  <p>Time: {paper.time} minutes</p>
-                  <p>Correct Marks: {paper.correctMarks}</p>
-                  <p>Negative Marks: {paper.negativeMarks}</p>
-                  <button className="view-details-btn">View Details</button>
-                </div>
-              </li>
+              <div
+                key={paper._id}
+                className="bg-white shadow-lg rounded-lg p-4 border"
+              >
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {paper.subject}
+                </h3>
+                <p className="text-sm text-gray-600 mt-2">
+                  Time: {paper.time} minutes
+                </p>
+                <p className="text-sm text-gray-600">
+                  Total Questions: {paper.totalQuestions}
+                </p>
+                <button
+                  className="mt-4 bg-blue-500 text-white text-sm px-4 py-2 rounded hover:bg-blue-600"
+                  onClick={() =>
+                    navigate(`/paper/${paper._id}`, { state: { paper } })
+                  }
+                >
+                  View Details
+                </button>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       ) : (
-        <p>No papers found for this teacher.</p>
+        <p className="text-center text-lg text-gray-700">
+          No papers found for this teacher.
+        </p>
       )}
     </div>
   );
