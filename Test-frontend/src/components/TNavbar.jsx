@@ -1,14 +1,10 @@
 import React, { useContext, useState } from "react";
-import assets from "../assets/assets";
-
-// import { assets } from '../assets/assets'
 import { NavLink, useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
+import assets from "../assets/assets";
 
 const TNavbar = () => {
   const navigate = useNavigate();
-
-  const [showMenu, setShowMenu] = useState(false);
   const { token, setToken, userData } = useContext(AppContext); // token is true if user is logged in
 
   const logout = () => {
@@ -24,46 +20,43 @@ const TNavbar = () => {
   };
 
   return (
-    <nav className="w-full h-[4rem] flex justify-around items-center bg-[#1a1919f0]  text-[#958e8ef9] border-y-[0.1px] border-t-0 border-[#958e8ef9]">
-      {/* Icon or Logo */}
-      <i className="hover:cursor-pointer hover:text-4.8xl text-[#4a9efe] text-5xl fa-brands fa-pied-piper"></i>
-      {/* Uncomment the line below if you prefer an image logo */}
-      {/* <img className="h-11 mx-[6rem]" src="../images/logo.jpeg" alt="study-logo" /> */}
+    <nav className="w-full h-[4rem] flex justify-between items-center px-6 bg-[#f4f7fc] text-[#2a4365] border-b border-gray-300">
+      {/* Logo */}
+      <i className="hover:cursor-pointer text-[#3182ce] text-4xl fa-brands fa-pied-piper"></i>
 
       {/* Navigation Links */}
-      <div className="flex space-x-8" onClick={addTestHandler}>
-        <ul className="text-lg hover:cursor-pointer hover:text-white">
+      <div>
+        <ul
+          onClick={addTestHandler}
+          className="text-lg font-semibold hover:text-[#3182ce] transition duration-300 cursor-pointer"
+        >
           Add Test
         </ul>
       </div>
 
-      {/* Log Out Button */}
+      {/* User Actions */}
       <div>
         {!token && !userData ? (
-          <div>
+          <button
+            onClick={login}
+            className="bg-[#3182ce] text-white font-semibold px-4 py-1 rounded-md hover:bg-[#225d9c] transition duration-300"
+          >
+            Login
+          </button>
+        ) : (
+          <div className="flex items-center space-x-3">
+            <img
+              className="w-10 h-10 rounded-full border border-gray-300"
+              src={assets.userImg}
+              alt="User"
+            />
             <button
-              onClick={login}
-              className="hover:bg-[#8a7b5bd3] font-semibold border-2 p-1 px-4 text-yellow-500 border-none bg-[#513916a8] rounded-md mx-2"
+              onClick={logout}
+              className="bg-[#3182ce] text-white font-semibold px-4 py-1 rounded-md hover:bg-[#2b6cb0] transition duration-300"
             >
-              Login
+              Log Out
             </button>
           </div>
-        ) : (
-          <>
-            <div className="flex items-center space-x-3">
-              <img
-                className="w-10 h-10 rounded-full"
-                src={assets.userImg}
-                alt="User"
-              />
-              <button
-                onClick={logout}
-                className="hover:bg-[#8a7b5bd3] font-semibold  p-1 px-4 text-yellow-500 bg-[#513916a8] rounded-md"
-              >
-                Log Out
-              </button>
-            </div>
-          </>
         )}
       </div>
     </nav>

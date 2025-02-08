@@ -172,14 +172,18 @@ const AppContextProvider = (props) => {
         toast.error(data.message);
       }
     } catch (error) {
-      console.log(error);
-      toast.error(error.message);
+      if (error.response?.status === 401) {
+        toast.error("Session expired, please login again.");
+      } else {
+        toast.error(error.response?.data?.message || "Something went wrong.");
+      }
     }
   };
 
   useEffect(() => {
     if (token) {
       // loadUserProfileData();
+
       loadTeacherProfileData();
     }
   }, [token]);

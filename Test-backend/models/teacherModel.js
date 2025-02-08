@@ -8,7 +8,6 @@ const teacherSchema = new mongoose.Schema({
   gender: { type: String, default: "Not Selected" },
   dob: { type: String, default: "Not Selected" },
   password: { type: String, required: true },
-  teacherId: { type: String, unique: true, required: true },
 });
 
 const teacherModel =

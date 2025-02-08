@@ -6,10 +6,10 @@ import teacherModel from "../models/teacherModel.js";
 
 const registerTeacher = async (req, res) => {
   try {
-    const { name, email, password, userType, teacherId } = req.body;
+    const { name, email, password, userType } = req.body;
 
     // checking for all data to register user
-    if (!name || !email || !password || !teacherId) {
+    if (!name || !email || !password) {
       return res.json({ success: false, message: "Missing Details" });
     }
 
@@ -29,15 +29,6 @@ const registerTeacher = async (req, res) => {
       });
     }
 
-    // Check if teacherId already exists
-    const existingTeacher = await teacherModel.findOne({ teacherId });
-    if (existingTeacher) {
-      return res.json({
-        success: false,
-        message: "Teacher ID already exists. Please use a unique ID.",
-      });
-    }
-
     // hashing user password
     const salt = await bcrypt.genSalt(10); // the more no. round the more time it will take
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -46,7 +37,6 @@ const registerTeacher = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      teacherId,
     };
 
     const newTeacher = new teacherModel(teacherData);
@@ -124,31 +114,34 @@ const getTeacherProfile = async (req, res) => {
 // API to save the paper submitted by teacher
 const saveQuizPaper = async (req, res) => {
   try {
+    console.log("Received data:", req.body);
     const {
+      subject,
       totalQuestions,
-      teacherId,
       time,
       correctMarks,
       negativeMarks,
       questions,
-      subject,
     } = req.body;
+    const teacherId = req.body.userId; // ✅ Extracted from `authUser` middleware
 
     // Validate required fields
     if (
+      !subject ||
       !totalQuestions ||
       !time ||
       !correctMarks ||
       !questions ||
-      !subject ||
       !teacherId
     ) {
-      return res.json({ success: false, message: "Missing required details" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required details" });
     }
 
-    // Validate total questions
+    // Validate total questions count
     if (questions.length !== totalQuestions) {
-      return res.json({
+      return res.status(400).json({
         success: false,
         message:
           "The number of questions does not match the totalQuestions count",
@@ -156,7 +149,7 @@ const saveQuizPaper = async (req, res) => {
     }
 
     // Save the paper in the database
-    const paperData = {
+    const newPaper = new paperModel({
       subject,
       teacherId,
       totalQuestions,
@@ -164,35 +157,25 @@ const saveQuizPaper = async (req, res) => {
       correctMarks,
       negativeMarks,
       questions,
-    };
-
-    const newPaper = new paperModel(paperData);
-    const savedPaper = await newPaper.save();
+    });
+    await newPaper.save();
 
     res.json({
       success: true,
       message: "Quiz paper saved successfully",
-      paper: savedPaper,
+      paper: newPaper,
     });
   } catch (error) {
-    console.error(error);
-    res.json({ success: false, message: error.message });
+    console.error("Error saving quiz paper:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
 // API to get the paper submitted by teacher
-const getPaper = async (req, res) => {
+const getAllPapers = async (req, res) => {
   try {
-    const { teacherId } = req.body; // Get teacherId from request body
-
-    if (!teacherId) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Teacher ID is required" });
-    }
-
-    // Query the papers saved by the teacher
-    const papers = await paperModel.find({ teacherId });
+    // ✅ Query the papers submitted by the teacher
+    const papers = await paperModel.find({});
 
     if (!papers.length) {
       return res
@@ -207,9 +190,7 @@ const getPaper = async (req, res) => {
   }
 };
 
-
-
-    // API to update paper
+// API to update paper
 const updatePaper = async (req, res) => {
   try {
     const {
@@ -222,7 +203,15 @@ const updatePaper = async (req, res) => {
       questions, // Array of updated questions
     } = req.body;
 
-    if (!paperId || !totalQuestions || !time || !correctMarks || !negativeMarks || !subject || !questions) {
+    if (
+      !paperId ||
+      !totalQuestions ||
+      !time ||
+      !correctMarks ||
+      !negativeMarks ||
+      !subject ||
+      !questions
+    ) {
       return res.json({ success: false, message: "Missing required details" });
     }
 
@@ -253,12 +242,12 @@ const updatePaper = async (req, res) => {
     console.error("Error updating paper:", error);
     res.json({ success: false, message: error.message });
   }
-}
+};
 export {
   loginTeacher,
   registerTeacher,
   saveQuizPaper,
-  getPaper,
+  getAllPapers,
   getTeacherProfile,
   updatePaper,
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AppContext } from "../context/AppContext";
+import { useNavigate } from "react-router-dom";
 
 const TAddQues = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -12,7 +13,8 @@ const TAddQues = () => {
   const [subject, setSubject] = useState("");
   const [teacherId, setTeacherId] = useState("");
 
-  const { teacherData } = useContext(AppContext);
+  const { teacherData, token } = useContext(AppContext);
+  const navigate = useNavigate();
 
   // Disable scroll for input fields to prevent unwanted behavior
   const preventScroll = (e) => {
@@ -34,10 +36,9 @@ const TAddQues = () => {
 
   useEffect(() => {
     if (teacherData) {
-      setTeacherId(teacherData.teacherId); // Setting teacherId dynamically
-      console.log(teacherId);
+      setTeacherId(teacherData._id);
     }
-  }, []);
+  }, [teacherData]); // ✅ Added teacherData as dependency
 
   // Handle submitting quiz data to the backend
   const handleSubmit = async () => {
@@ -52,12 +53,19 @@ const TAddQues = () => {
     };
 
     try {
+      console.log("Sending Token:", token); // Debugging line
+
       const response = await axios.post(
-        backendUrl + "/api/user/saveQuizPaper",
-        quizData
+        `${backendUrl}/api/user/saveQuizPaper`,
+        quizData,
+        {
+          headers: { token },
+        }
       );
+
       if (response.data.success) {
         alert("Quiz saved successfully!");
+        navigate("/THome");
       } else {
         alert("Failed to save quiz!");
       }

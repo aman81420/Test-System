@@ -16,6 +16,6 @@ const paperSchema = new mongoose.Schema({
   questions: { type: [questionSchema], required: true },
 });
 
-const paperModel = mongoose.model("paperModel", paperSchema, "Teacher Details");
+const paperModel = mongoose.model("paperModel", paperSchema, "Saved-Papers");
 
 export default paperModel;

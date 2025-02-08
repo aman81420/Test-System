@@ -1,27 +1,34 @@
-import React from 'react';
-import assets from '../assets/assets';
+import React from "react";
+import assets from "../assets/assets";
 
 const Footer = () => {
   return (
-    <footer className="bg-[#1a1919f0] text-[#958e8ef9] flex justify-around items-center h-12">
-      {/* Copyright Section */}
-      <div>
-        <p>Copyright © 2024 LeetCode</p>
-      </div>
+    <footer className="bg-[#f4f7fc] text-[#2a4365] border-t border-gray-300 p-4">
+      <div className="flex flex-col md:flex-row items-center justify-between max-w-6xl mx-auto space-y-3 md:space-y-0">
+        {/* Copyright Section */}
+        <div>
+          <p className="text-sm font-medium text-center md:text-left">
+            © 2024 LeetCode. All rights reserved.
+          </p>
+        </div>
 
-      {/* Links Section */}
-      <div className="flex justify-between">
-        <p className="hover:cursor-pointer hover:text-white mx-2">Help Center</p>
-        <p className="mx-2">|</p>
-        <p className="hover:cursor-pointer hover:text-white mx-2">Terms</p>
-        <p className="mx-2">|</p>
-        <p className="hover:cursor-pointer hover:text-white mx-2">Privacy Policy</p>
-      </div>
+        {/* Links Section */}
+        <div className="flex flex-wrap justify-center space-x-4 text-sm">
+          {["Help Center", "Terms", "Privacy Policy"].map((item, index) => (
+            <React.Fragment key={index}>
+              {index > 0 && <span>|</span>}
+              <p className="hover:cursor-pointer hover:text-[#3182ce] transition duration-300">
+                {item}
+              </p>
+            </React.Fragment>
+          ))}
+        </div>
 
-      {/* Country Section */}
-      <div className="flex w-20 justify-around items-center">
-        <img className="h-6 w-6 rounded-[50%]" src={assets.flag} alt="Flag" />
-        Bharat
+        {/* Country Section */}
+        <div className="flex items-center space-x-2">
+          <img className="h-5 w-5 rounded-full" src={assets.flag} alt="Flag" />
+          <span className="font-medium">Bharat</span>
+        </div>
       </div>
     </footer>
   );

@@ -6,7 +6,7 @@ import {
 } from "../controllers/userController.js";
 import {
   saveQuizPaper,
-  getPaper,
+  getAllPapers,
   getTeacherProfile,
   registerTeacher,
   loginTeacher,
@@ -21,8 +21,8 @@ userRouter.post("/register", registerUser);
 userRouter.post("/registerTeacher", registerTeacher);
 userRouter.post("/login", loginUser);
 userRouter.post("/loginTeacher", loginTeacher);
-userRouter.post("/saveQuizPaper", saveQuizPaper);
-userRouter.post("/getPaper", getPaper);
+userRouter.post("/saveQuizPaper", authUser, saveQuizPaper);
+userRouter.get("/getPaper", authUser, getAllPapers);
 // Update paper route
 userRouter.post("/updatePaper", updatePaper);
 
@@ -34,5 +34,6 @@ userRouter.post(
   // updateProfile
 );
 userRouter.get("/getTeacherProfile", authUser, getTeacherProfile);
+userRouter.get("/getAllPapers", getAllPapers);
 
 export default userRouter;

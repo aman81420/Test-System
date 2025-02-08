@@ -13,7 +13,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
-  // const [teacherId, setTeacherId] = useState("");
+  const [teacherId, setTeacherId] = useState("");
   const navigate = useNavigate();
   const { backendUrl, token, setToken } = useContext(AppContext);
 
@@ -109,18 +109,7 @@ const Login = () => {
             />
           </div>
         )}
-        {state === "Sign Up" && userType === "teacher" && (
-          <div className="w-full">
-            <p className="text-gray-700">TeacherId</p>
-            <input
-              onChange={(e) => setTeacherId(e.target.value)}
-              value={teacherId}
-              className="border border-gray-300 rounded w-full p-2 mt-1"
-              type="String"
-              required
-            />
-          </div>
-        )}
+
         <div className="w-full">
           <p className="text-gray-700">Email</p>
           <input

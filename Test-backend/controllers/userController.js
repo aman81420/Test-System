@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import validator from "validator";
 import userModel from "../models/userModel.js";
 import teacherModel from "../models/teacherModel.js";
+import paperModel from "../models/paperModel.js";
 // API to register user
 const registerUser = async (req, res) => {
   try {
@@ -95,4 +96,32 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-export { loginUser, registerUser, getUserProfile };
+// API to get all papers
+const getPaper = async (req, res) => {
+  try {
+    const papers = await paperModel.find();
+    res.json({ success: true, papers });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// API to get a single paper by ID
+const getPaperById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const paper = await paperModel.findById(id);
+
+    if (!paper) {
+      return res.json({ success: false, message: "Paper not found" });
+    }
+
+    res.json({ success: true, paper });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export { loginUser, registerUser, getUserProfile, getPaper, getPaperById };
