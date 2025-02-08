@@ -1,35 +1,81 @@
-import React, { useContext, useState, useEffect } from "react";
-import assets from "../assets/assets";
+import React, { useState, useEffect, useContext } from "react";
 import { AppContext } from "../context/AppContext";
-import { Navigate, useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 const QuizPage = () => {
-  const Navigate = useNavigate();
-  const {
-    quesNo,
+  const navigate = useNavigate();
+  const { backendUrl } = useContext(AppContext);
 
-    quesOptions,
-    setQuesOptions,
+  const [timer, setTimer] = useState(1500);
+  const [quesNo, setQuesNo] = useState(1);
+  const [quesStatement, setQuesStatement] = useState("");
+  const [quesOptions, setQuesOptions] = useState([]);
+  const [quizQuestions, setQuizQuestions] = useState([]);
+  const [totalQues, setTotalQues] = useState(0);
+  const [userAns, setUserAns] = useState([]);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [questionStatus, setQuestionStatus] = useState([]);
+  const [isConfirm, setIsConfirm] = useState(false);
 
-    totalQues,
-    questionStatus,
+  // Fetch quiz questions
+  const fetchPaperById = async (paperId) => {
+    try {
+      const { data } = await axios.get(
+        `${backendUrl}/api/user/getPaperById/${paperId}`
+      );
 
-    selectedOption,
-    setSelectedOption,
-    userAns,
-    questionClickHandler,
-    handleSaveAndNext,
-    handleClearResponse,
-    handleMarkForReview,
-    getButtonClass,
-    quizQuestions,
+      if (data.success) {
+        setQuizQuestions(data.paper.questions);
 
-    quesStatement,
-    setQuesStatement,
-    timer,
-    isConfirm,
-    setIsConfirm,
-  } = useContext(AppContext);
+        setTotalQues(data.paper.totalQuestions);
+        setTimer(data.paper.time * 60);
+        setUserAns(Array(data.paper.totalQuestions).fill(0));
+        setQuestionStatus(Array(data.paper.totalQuestions).fill("notVisited"));
+
+        // Set first question
+        if (data.paper.questions.length > 0) {
+          setQuesStatement(data.paper.questions[0].questionText);
+          setQuesOptions(data.paper.questions[0].options); // Ensure options exist
+        }
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching paper details:", error);
+      toast.error("Error fetching paper details.");
+    }
+  };
+
+  const handleSubmit = () => {
+    const answeredCount = userAns.filter((ans) => ans !== 0).length;
+    const notAnsweredCount = totalQues - answeredCount;
+
+    const correctAnswers = quizQuestions.map((q) => q.correctOption + 1); //   1-based indexing
+
+    const correctCount = userAns.filter(
+      (ans, index) => ans === correctAnswers[index]
+    ).length;
+    const incorrectCount = answeredCount - correctCount;
+
+    const quizResult = {
+      totalQuestions: totalQues,
+      answered: answeredCount,
+      notAnswered: notAnsweredCount,
+      correct: correctCount,
+      incorrect: incorrectCount,
+      userAnswers: userAns.map((ans, index) => ({
+        question: quizQuestions[index]?.questionText,
+        options: quizQuestions[index]?.options,
+        selectedOption:
+          ans > 0 ? quizQuestions[index]?.options[ans - 1] : "Not Answered", // Convert to 1-based
+        correctOption: quizQuestions[index]?.options[correctAnswers[index] - 1], // Convert to 1-based
+      })),
+    };
+
+    navigate("/result", { state: { quizResult } });
+  };
 
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600);
@@ -39,18 +85,130 @@ const QuizPage = () => {
       .toString()
       .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
+  const handleMarkForReview = () => {
+    setQuestionStatus((prevStatus) => {
+      const newStatus = [...prevStatus];
+      newStatus[quesNo - 1] = "markForReview";
+      return newStatus;
+    });
+
+    if (quesNo < totalQues) {
+      setQuesNo((prev) => prev + 1);
+    }
+
+    setSelectedOption(null);
+  };
+
+  const questionClickHandler = (num) => {
+    setQuesNo(num);
+    updateQuestionState(num);
+
+    setQuestionStatus((prevStatus) => {
+      const newStatus = [...prevStatus];
+      if (newStatus[num - 1] === "notVisited") {
+        newStatus[num - 1] = "notAnswered";
+      }
+      return newStatus;
+    });
+  };
+
+  const updateQuestionState = (questionIndex) => {
+    if (quizQuestions.length === 0) {
+      console.warn("Quiz questions are not loaded yet.");
+      return;
+    }
+
+    if (questionIndex > 0 && questionIndex <= quizQuestions.length) {
+      const currentQuestion = quizQuestions[questionIndex - 1]; // Adjusted index
+      setQuesStatement(
+        currentQuestion.question || "No question text available"
+      );
+      setQuesOptions(currentQuestion.answers || []);
+      setSelectedOption(userAns[questionIndex - 1] || null);
+    } else {
+      console.warn("Invalid question index:", questionIndex);
+    }
+  };
+
+  // Handle Save & Next button click
+  const handleSaveAndNext = () => {
+    if (selectedOption !== null) {
+      setUserAns((prev) => {
+        const newAns = [...prev];
+        newAns[quesNo - 1] = selectedOption;
+        return newAns;
+      });
+
+      setQuestionStatus((prevStatus) => {
+        const newStatus = [...prevStatus];
+        newStatus[quesNo - 1] = "answered";
+        if (newStatus[quesNo] == "notVisited")
+          newStatus[quesNo] = "notAnswered";
+        return newStatus;
+      });
+    }
+
+    if (quesNo < totalQues) {
+      setQuesNo((prev) => prev + 1);
+    }
+
+    setSelectedOption(null); // Reset selected option
+  };
+
+  const handleClearResponse = () => {
+    setUserAns((prev) => {
+      const newAns = [...prev];
+      newAns[quesNo - 1] = 0; // Clear the answer for the current question
+      return newAns;
+    });
+
+    setQuestionStatus((prevStatus) => {
+      const newStatus = [...prevStatus];
+      newStatus[quesNo - 1] = "notAnswered"; // Mark as not answered
+      return newStatus;
+    });
+
+    setSelectedOption(null); // Clear the selected option in the UI
+  };
+
+  const getButtonClass = (status) => {
+    switch (status) {
+      case "answered":
+        return "bg-green-600";
+      case "notAnswered":
+        return "bg-red-600";
+      case "visited":
+        return "bg-gray-400";
+      case "markForReview":
+        return "bg-violet-500";
+      default:
+        return "bg-gray-400";
+    }
+  };
+
+  useEffect(() => {
+    if (timer > 0) {
+      const interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
+      return () => clearInterval(interval);
+    } else {
+      handleTimeEnd();
+    }
+  }, [timer]);
+  const handleTimeEnd = () => {
+    console.log("Time's up!");
+    // Add your auto-submit logic here
+  };
 
   // Update question details when `quesNo` changes
   useEffect(() => {
     if (quesNo > 0 && quesNo <= quizQuestions.length) {
-      const currentQuestion = quizQuestions[quesNo - 1]; // Adjusted index
-      setQuesStatement(currentQuestion.question);
-      setQuesOptions(currentQuestion.answers);
+      const currentQuestion = quizQuestions[quesNo - 1];
+      setQuesStatement(currentQuestion.questionText); // ✅ Correct field
+      setQuesOptions(currentQuestion.options || []); // ✅ Ensure options exist
 
-      // Pre-select an option if already answered
-      setSelectedOption(userAns[quesNo - 1] || null); // Adjusted index
+      setSelectedOption(userAns[quesNo - 1] || null);
     }
-  }, [quesNo, quizQuestions, userAns, questionStatus]);
+  }, [quesNo, quizQuestions, userAns]);
   useEffect(() => {}, [isConfirm]);
 
   // to disable the reload and back option
@@ -59,7 +217,7 @@ const QuizPage = () => {
       event.preventDefault();
       event.returnValue = "";
     };
-
+    fetchPaperById("67a6974392b6ec8fdbe15571");
     const preventBackNavigation = () => {
       window.history.pushState(null, "", window.location.href);
     };
@@ -88,7 +246,7 @@ const QuizPage = () => {
             Yes, Start
           </button>
           <button
-            onClick={() => Navigate("/")}
+            onClick={() => navigate("/")}
             className="bg-red-500 text-white py-2 px-4 rounded"
           >
             Cancel
@@ -101,7 +259,7 @@ const QuizPage = () => {
       id="DSA-view"
       className="m-0 p-0 overflow-x-auto  max-width:100% min-width:1000px"
     >
-      <div className="h-screen w-screen grid lg:grid-cols-4 lg:grid-rows-8 grid-cols-2">
+      <div className="h-screen w-screen md:grid lg:grid-cols-4 lg:grid-rows-8 grid-cols-2">
         {/* Header */}
         <div className="col-start-1 col-end-4 text-2xl text-blue-950 font-semibold m-3">
           Mock Test(DSA)
@@ -154,7 +312,7 @@ const QuizPage = () => {
                   htmlFor={`opt${index + 1}`}
                   className="font-semibold text-gray-800"
                 >
-                  {option.text}
+                  {option}
                 </label>
               </div>
             ))}
@@ -162,7 +320,8 @@ const QuizPage = () => {
         </div>
 
         {/* Question Status Section */}
-        <div className="grid grid-rows-2 grid-cols-2 border-2 row-start-2 row-end-4 col-start-4 col-end-5 text-gray-800 font-semibold">
+
+        <div className=" hidden md:grid grid-rows-2 grid-cols-2 border-2 row-start-2 row-end-4 col-start-4 col-end-5 text-gray-800 font-semibold">
           <div className="flex items-center justify-start">
             <div className="h-7 w-7 rounded-lg bg-green-600 m-3"></div>
             <div>Answered</div>
@@ -182,7 +341,7 @@ const QuizPage = () => {
         </div>
 
         {/* Question Navigation Buttons */}
-        <div className="border-x-2 row-start-4 row-end-8">
+        <div className=" border-x-2 row-start-4 row-end-8">
           <p className="text-center font-bold p-2">Choose a question</p>
           <div className="grid lg:grid-cols-4 lg:grid-rows-4 grid-cols-2">
             {Array.from({ length: totalQues }, (_, i) => (
@@ -201,7 +360,9 @@ const QuizPage = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="border-y-2 flex justify-center items-center">
+        <div className="border-y-2 flex flex-col md:flex-row justify-center items-center">
+          {" "}
+          {/* Flex direction for responsiveness */}
           <button
             id="markReview"
             onClick={handleMarkForReview}
@@ -233,10 +394,12 @@ const QuizPage = () => {
             Save & Next
           </button>
         </div>
+
         <div className="border-2 flex justify-center items-center">
           <button
             id="submit-btn"
             className="border-2 px-3 py-1 text-white font-semibold bg-blue-950"
+            onClick={handleSubmit} // Add this
           >
             Submit
           </button>

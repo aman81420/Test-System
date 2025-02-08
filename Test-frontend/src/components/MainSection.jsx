@@ -3,10 +3,16 @@ import { motion } from "framer-motion";
 import { Book, Clock, CheckCircle, XCircle, List } from "lucide-react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const MainSection = () => {
   const [papers, setPapers] = useState([]);
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const navigate = useNavigate();
+
+  const handlePaperClick = (id) => {
+    navigate(`/Quiz-Page/${id}`);
+  };
 
   useEffect(() => {
     const fetchPapers = async () => {
@@ -39,6 +45,7 @@ const MainSection = () => {
               className="bg-white border border-gray-300 shadow-md rounded-xl p-5 hover:shadow-xl transition duration-500 cursor-pointer"
               initial={{ opacity: 0, y: -30 }}
               animate={{ opacity: 1, y: 0 }}
+              onClick={() => handlePaperClick(paper._id)}
               transition={{
                 delay: index * 0.1,
                 duration: 0.6,

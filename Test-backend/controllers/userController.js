@@ -116,7 +116,7 @@ const getPaperById = async (req, res) => {
     if (!paper) {
       return res.json({ success: false, message: "Paper not found" });
     }
-
+    console.log(paper);
     res.json({ success: true, paper });
   } catch (error) {
     console.log(error);

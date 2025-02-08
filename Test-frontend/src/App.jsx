@@ -10,6 +10,7 @@ import TAskQues from "./components/TAddQues";
 import PaperDetails from "./components/PaperDetails";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import ResultPage from "./pages/Result";
 
 const App = () => {
   return (
@@ -18,8 +19,9 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/Home" element={<Home />} />
+        <Route path="/result" element={<ResultPage />} />
         <Route path="/Contact" element={<Contact />} />
-        <Route path="/Quiz-Page" element={<QuizPage />} />
+        <Route path="/Quiz-Page/:id" element={<QuizPage />} />
         <Route path="/Login" element={<Login />} />
         <Route path="/THome" element={<THome />} />
         <Route path="/About" element={<About />} />

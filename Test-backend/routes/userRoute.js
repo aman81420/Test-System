@@ -3,6 +3,7 @@ import {
   loginUser,
   registerUser,
   getUserProfile,
+  getPaperById,
 } from "../controllers/userController.js";
 import {
   saveQuizPaper,
@@ -23,6 +24,7 @@ userRouter.post("/login", loginUser);
 userRouter.post("/loginTeacher", loginTeacher);
 userRouter.post("/saveQuizPaper", authUser, saveQuizPaper);
 userRouter.get("/getPaper", authUser, getAllPapers);
+userRouter.get("/getPaperById/:id", getPaperById);
 // Update paper route
 userRouter.post("/updatePaper", updatePaper);
 

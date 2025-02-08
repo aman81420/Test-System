@@ -8,14 +8,15 @@ import "react-toastify/dist/ReactToastify.css";
 
 const Login = () => {
   const [state, setState] = useState("log in");
-  const [userType, setUserType] = useState("student"); // Default user type
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
   const [teacherId, setTeacherId] = useState("");
   const navigate = useNavigate();
-  const { backendUrl, token, setToken } = useContext(AppContext);
+  const { backendUrl, token, setToken, userType, setUserType } =
+    useContext(AppContext);
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
