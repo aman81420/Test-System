@@ -4,6 +4,7 @@ import validator from "validator";
 import userModel from "../models/userModel.js";
 import teacherModel from "../models/teacherModel.js";
 import paperModel from "../models/paperModel.js";
+
 // API to register user
 const registerUser = async (req, res) => {
   try {
@@ -110,18 +111,19 @@ const getPaper = async (req, res) => {
 // API to get a single paper by ID
 const getPaperById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const paper = await paperModel.findById(id);
+    const { id } = req.params; // This will be the default _id
+    const paper = await paperModel.findById(id); // No need to specify _id, it's default
 
     if (!paper) {
-      return res.json({ success: false, message: "Paper not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Paper not found" });
     }
-    console.log(paper);
-    res.json({ success: true, paper });
+
+    res.status(200).json({ success: true, paper });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+    console.error("Error fetching paper:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
-
 export { loginUser, registerUser, getUserProfile, getPaper, getPaperById };

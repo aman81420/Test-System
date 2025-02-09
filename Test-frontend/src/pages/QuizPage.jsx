@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useContext } from "react";
 import { AppContext } from "../context/AppContext";
-import { data, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
 
 const QuizPage = () => {
+  const params = useParams(); // ✅ Use params object
+  const paperId = params.id; // ✅ Get the actual string
+
   const navigate = useNavigate();
   const { backendUrl } = useContext(AppContext);
 
-  const [timer, setTimer] = useState(1500);
+  const [timer, setTimer] = useState();
   const [quesNo, setQuesNo] = useState(1);
   const [quesStatement, setQuesStatement] = useState("");
   const [quesOptions, setQuesOptions] = useState([]);
@@ -199,6 +202,8 @@ const QuizPage = () => {
     // Add your auto-submit logic here
   };
 
+  useEffect(() => {}, [paperId]); // ✅ Re-run when `id` in URL changes
+
   // Update question details when `quesNo` changes
   useEffect(() => {
     if (quesNo > 0 && quesNo <= quizQuestions.length) {
@@ -217,7 +222,7 @@ const QuizPage = () => {
       event.preventDefault();
       event.returnValue = "";
     };
-    fetchPaperById("67a6974392b6ec8fdbe15571");
+    fetchPaperById(paperId);
     const preventBackNavigation = () => {
       window.history.pushState(null, "", window.location.href);
     };
@@ -341,9 +346,14 @@ const QuizPage = () => {
         </div>
 
         {/* Question Navigation Buttons */}
-        <div className=" border-x-2 row-start-4 row-end-8">
+        <div className="border-x-2 row-start-4 row-end-8 overflow-y-auto max-h-[300px]">
           <p className="text-center font-bold p-2">Choose a question</p>
-          <div className="grid lg:grid-cols-4 lg:grid-rows-4 grid-cols-2">
+          <div
+            className={`grid grid-cols-2 lg:grid-cols-4`}
+            style={{
+              gridTemplateRows: `repeat(${Math.ceil(totalQues / 4)}, auto)`,
+            }}
+          >
             {Array.from({ length: totalQues }, (_, i) => (
               <div
                 onClick={() => questionClickHandler(i + 1)}

@@ -11,7 +11,7 @@ const MainSection = () => {
   const navigate = useNavigate();
 
   const handlePaperClick = (id) => {
-    navigate(`/Quiz-Page/${id}`);
+    navigate(`/Quiz-Page/${id}`); // Navigate to Quiz Page with paperId
   };
 
   useEffect(() => {

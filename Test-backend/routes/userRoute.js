@@ -23,7 +23,7 @@ userRouter.post("/registerTeacher", registerTeacher);
 userRouter.post("/login", loginUser);
 userRouter.post("/loginTeacher", loginTeacher);
 userRouter.post("/saveQuizPaper", authUser, saveQuizPaper);
-userRouter.get("/getPaper", authUser, getAllPapers);
+userRouter.get("/getPaper", getAllPapers);
 userRouter.get("/getPaperById/:id", getPaperById);
 // Update paper route
 userRouter.post("/updatePaper", updatePaper);
